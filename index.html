@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instadoc Metric Tracker</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+    <div class="decorations-container" id="decorations">
+        <div class="deco-ring large-green"></div>
+        <div class="deco-ring bottom-gray"></div>
+        <i class="fa-solid fa-plus deco-plus plus-pos-1"></i>
+        <i class="fa-solid fa-plus deco-plus plus-pos-2"></i>
+        <i class="fa-solid fa-plus deco-plus plus-pos-3"></i>
+    </div>
+
+    <div id="landing-view">
+        <nav class="navbar">
+            <div class="logo"><img src="assets/INN.png" alt="Instadoc Logo"></div>
+            <ul class="nav-links">
+                <li><a href="#">Home</a></li>
+                <li><a href="#">About</a></li>
+                <li><a href="#">Service</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </nav>
+
+        <section class="hero-container">
+            <div class="hero-content">
+                <h1>We Value <br>Your <span class="highlight">Health</span></h1>
+                <p>Track your vitals, visualize trends, and share data with your doctor securely. Your comprehensive health companion.</p>
+                <button class="info-btn">Read More</button>
+                <div class="auth" id="auth-buttons">
+                    <div class="auth-options">
+                        <span class="auth-label">Already have an account?</span>
+                        <button class="login-btn" onclick="openModal('login')">Login</button>
+                    </div>
+                    <div class="auth-options">
+                        <span class="auth-label">No account?</span>
+                        <button class="signup-btn" onclick="openModal('signup')">Signup</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="hero-image">
+                <img src="assets/INN 2.png" alt="Doctor">
+            </div>
+
+            <div class="appointment-card">
+                <div class="card-header"><h3>Make an appointment</h3></div>
+                <div class="card-body">
+                    <p>Enter your contacts below to schedule an appointment or discuss it with us in details.</p>
+                    <form action="#">
+                        <div class="form-group"><input type="text" class="form-control" placeholder="Your name*" required></div>
+                        <div class="form-group"><input type="email" class="form-control" placeholder="Your email address*" required></div>
+                        <div class="form-group"><input type="tel" class="form-control" placeholder="Phone number*" required></div> 
+                        <button type="submit" class="book-btn">Book now</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div id="dashboard-view">
+        
+        <div class="dash-left-pane">
+            <div class="dash-logo-area">
+                <img src="assets/INN.png" alt="Instadoc Logo" class="dashboard-logo-img">
+            </div>
+
+            <div class="dash-sidebar-area">
+                <aside class="sidebar">
+                    <div class="sidebar-inner">
+                        <nav class="nav-menu">
+                            <ul class="nav-list">
+                                <li class="nav-item active" id="nav-dashboard">
+                                    <a href="#" class="nav-link" onclick="switchView('dashboard', this); return false;">
+                                        <i class="fa-solid fa-house"></i><span>Dashboard</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item" id="nav-metrics">
+                                    <a href="#" class="nav-link" onclick="switchView('metrics', this); return false;">
+                                        <i class="fa-solid fa-heart-pulse"></i><span>Health Metrics</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link">
+                                        <i class="fa-regular fa-calendar-check"></i><span>Appointments</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link">
+                                        <i class="fa-solid fa-gear"></i><span>Settings</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+
+                        <div class="nurse-section">
+                            <img src="assets/INN 2.png" onerror="this.src='https://placehold.co/300x400/1a1c23/FFF?text=Nurse+Image'" alt="Nurse" class="nurse-img">
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+
+        <div class="dash-right-pane">
+            
+            <header class="dash-header-area">
+                <div class="header-actions">
+                    <div class="profile-pic">
+                        <img src="https://i.pravatar.cc/150?img=32" alt="User Profile">
+                    </div>
+                </div>
+            </header>
+
+            <main class="dash-content-area">
+                <div class="mobile-header">
+                    <img src="assets/INN.png" alt="Logo" class="mobile-logo">
+                    <button class="icon-btn btn-ghost" onclick="logout()">
+                        <i class="fa-solid fa-right-from-bracket text-xl"></i>
+                    </button>
+                </div>
+
+                <div class="dashboard-container">
+
+                    <div id="view-dashboard" class="animate-fade-in">
+                        <div class="page-title-badge"><h2>Quick Actions</h2></div>
+                        <div class="quick-actions-grid">
+                            
+                            <div class="card cursor-pointer hover-border-green" onclick="openModal('reminders')">
+                                <div class="action-card-inner">
+                                    <div class="metric-icon-box icon-box-blue-light"><i class="fa-regular fa-bell"></i></div>
+                                    <h3 class="action-title">Reminders</h3>
+                                    <p class="action-desc">Set daily alerts to log your vitals.</p>
+                                </div>
+                            </div>
+
+                            <div class="card cursor-pointer hover-border-green" onclick="openModal('reports')">
+                                <div class="action-card-inner">
+                                    <div class="metric-icon-box icon-box-green-light"><i class="fa-solid fa-file-export"></i></div>
+                                    <h3 class="action-title">Export Reports</h3>
+                                    <p class="action-desc">Download PDF or CSV of your history.</p>
+                                </div>
+                            </div>
+
+                            <div class="card cursor-pointer hover-border-red" onclick="logout()">
+                                <div class="action-card-inner">
+                                    <div class="metric-icon-box icon-box-red-light"><i class="fa-solid fa-right-from-bracket"></i></div>
+                                    <h3 class="action-title text-red">Logout</h3>
+                                    <p class="action-desc">Sign out of your account securely.</p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div id="view-metrics" class="hidden-view">
+                        
+                        <div id="insight-banner" class="insight-box hidden-view">
+                            <i class="fa-solid fa-user-doctor insight-icon"></i>
+                            <div class="insight-text">
+                                <h4>AI Insight</h4>
+                                <p id="insight-text">Loading insights...</p>
+                            </div>
+                        </div>
+
+                        <section class="card">
+                            <div class="page-title-badge"><h2>Health Metrics Tracker</h2></div>
+
+                            <div class="dash-card-header">
+                                <div>
+                                    <h3 class="section-title">Analysis</h3>
+                                    <p class="subtitle">Visualize your progress</p>
+                                </div>
+                                <div class="chart-controls">
+                                    <div class="time-tabs">
+                                        <button class="chart-select active" onclick="setChartRange(7, this)">7 Days</button>
+                                        <button class="chart-select" onclick="setChartRange(30, this)">30 Days</button>
+                                    </div>
+                                    <div class="divider-vertical"></div>
+                                    <div class="chart-tabs">
+                                        <button id="btn-weight" class="chart-select active" onclick="updateChart('weight_logs', this)">Weight</button>
+                                        <button id="btn-bp" class="chart-select" onclick="updateChart('bp_logs', this)">BP</button>
+                                        <button id="btn-glucose" class="chart-select" onclick="updateChart('glucose_logs', this)">Glucose</button>
+                                        <button id="btn-temp" class="chart-select" onclick="updateChart('temp_logs', this)">temp</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="chart-wrapper">
+                                <canvas id="healthChart"></canvas>
+                            </div>
+                        </section>
+
+                        <section>
+                            <h3 class="metrics-section-title">Latest Readings</h3>
+                            
+                            <div class="metrics-grid">
+                                
+                                <div class="card metric-card-content" onclick="openModal('log-bp')">
+                                    <div class="metric-icon-box theme-bp"><i class="fa-solid fa-heart-pulse"></i></div>
+                                    <div class="metric-info">
+                                        <h4 class="metric-label">Blood Pressure</h4>
+                                        <div class="metric-value-large" id="val-bp">--/--</div>
+                                        <div class="metric-unit">mmHg</div>
+                                    </div>
+                                </div>
+
+                                <div class="card metric-card-content" onclick="openModal('log-weight')">
+                                    <div class="metric-icon-box theme-weight"><i class="fa-solid fa-weight-scale"></i></div>
+                                    <div class="metric-info">
+                                        <h4 class="metric-label">Weight</h4>
+                                        <div class="value-group"><span class="metric-value-large" id="val-weight">--</span><span class="metric-unit">kg</span></div>
+                                    </div>
+                                </div>
+
+                                <div class="card metric-card-content" onclick="openModal('log-glucose')">
+                                    <div class="metric-icon-box theme-glucose"><i class="fa-solid fa-droplet"></i></div>
+                                    <div class="metric-info">
+                                        <h4 class="metric-label">Blood Sugar</h4>
+                                        <div class="metric-value-large" id="val-gluc">--</div>
+                                        <div class="metric-unit">mg/dL</div>
+                                    </div>
+                                </div>
+
+                                <div class="card metric-card-content" onclick="openModal('log-temp')">
+                                    <div class="metric-icon-box theme-temp"><i class="fa-solid fa-temperature-half"></i></div>
+                                    <div class="metric-info">
+                                        <h4 class="metric-label">Temperature</h4>
+                                        <div class="metric-value-large" id="val-temp">--</div>
+                                        <div class="metric-unit">°C</div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </section>
+
+                        <section class="card">
+                            <h3 class="section-title text-md">Recent Activity</h3>
+                            <div class="history-table-container">
+                                <table class="history-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Metric</th>
+                                            <th>Value</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="history-body">
+                                        <tr><td colspan="4" class="loading-cell">Loading history...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="login-modal">
+        <div class="auth-modal">
+            <button class="close-modal" onclick="closeModals()">&times;</button>
+            <h2 class="modal-title">Welcome Back</h2>
+            <p class="error-msg" id="login-error"></p>
+            <form id="login-form">
+                <div class="form-group"><input type="email" id="login-email" class="form-control" placeholder="Email Address" required></div>
+                <div class="form-group"><input type="password" id="login-password" class="form-control" placeholder="Password" required></div>
+                <div class="forgot-wrapper"><a href="#" class="forgot-link" onclick="openModal('reset')">Forgot Password?</a></div>
+                <button type="submit" class="book-btn btn-full">Login</button>
+            </form>
+            <div class="divider">Or login with</div>
+            <div class="social-login">
+                <button type="button" class="social-btn" onclick="signInWithGoogle()"><i class="fa-brands fa-google google-icon"></i> Google</button>
+                <button type="button" class="social-btn" onclick="signInWithPhone()"><i class="fa-solid fa-phone phone-icon"></i> Phone</button>
+            </div>
+            <div class="auth-footer">Don't have an account? <a onclick="openModal('signup')">Sign Up</a></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="signup-modal">
+        <div class="auth-modal">
+            <button class="close-modal" onclick="closeModals()">&times;</button>
+            <h2 class="modal-title">Create Account</h2>
+            <p class="error-msg" id="signup-error"></p>
+            <form id="signup-form">
+                <div class="form-group"><input type="email" id="signup-email" class="form-control" placeholder="Email Address" required></div>
+                <div class="form-group"><input type="password" id="signup-password" class="form-control" placeholder="Password" required></div>
+                <div class="form-group"><input type="password" id="signup-confirm-password" class="form-control" placeholder="Confirm Password" required></div>
+                <button type="submit" class="book-btn btn-full">Sign Up</button>
+            </form>
+            <div class="divider">Or sign up with</div>
+            <div class="social-login">
+                <button type="button" class="social-btn" onclick="signInWithGoogle()"><i class="fa-brands fa-google google-icon"></i> Google</button>
+                <button type="button" class="social-btn" onclick="signInWithPhone()"><i class="fa-solid fa-phone phone-icon"></i> Phone</button>
+            </div>
+            <div class="auth-footer">Already have an account? <a onclick="openModal('login')">Login</a></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="reset-modal">
+        <div class="auth-modal">
+            <button class="close-modal" onclick="closeModals()">&times;</button>
+            <h2 class="modal-title">Reset Password</h2>
+            <p class="reset-desc">Enter your email address and we'll send you a link to reset your password.</p>
+            <p class="error-msg" id="reset-error"></p><p class="success-msg" id="reset-success"></p>
+            <form id="reset-form"><div class="form-group"><input type="email" id="reset-email" class="form-control" placeholder="Email Address" required></div><button type="submit" class="book-btn btn-full">Send Reset Link</button></form>
+            <div class="auth-footer">Remember your password? <a onclick="openModal('login')">Login</a></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="log-weight-modal">
+        <div class="auth-modal">
+            <button class="close-modal" onclick="closeModals()">&times;</button>
+            <h2 class="modal-title" id="weight-modal-title">Log Weight</h2>
+            <p class="success-msg" id="weight-success"></p><p class="error-msg" id="weight-error"></p>
+            <form id="weight-form">
+                <input type="hidden" id="weight-id"> <div class="unit-toggle-container"><div class="unit-toggle" onclick="toggleUnit('weight')"><div class="toggle-slider" id="weight-slider"></div><div class="unit-option active" id="opt-kg">kg</div><div class="unit-option" id="opt-lbs">lbs</div></div></div>
+                <input type="hidden" id="weight-unit" value="kg">
+                <div class="form-group"><input type="number" step="0.1" id="weight-val" class="form-control" placeholder="Weight Value" required></div>
+                <div class="form-group"><input type="date" id="weight-date" class="form-control" required></div>
+                <button type="submit" class="book-btn btn-full" id="weight-btn">Save Log</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="log-bp-modal">
+        <div class="auth-modal">
+            <button class="close-modal" onclick="closeModals()">&times;</button>
+            <h2 class="modal-title" id="bp-modal-title">Log BP</h2>
+            <p class="success-msg" id="bp-success"></p><p class="error-msg" id="bp-error"></p>
+            <form id="bp-form">
+                <input type="hidden" id="bp-id">
+                <div class="flex-row"><div class="form-group flex-1"><input type="number" id="bp-sys" class="form-control" placeholder="Systolic (120)" required></div><div class="form-group flex-1"><input type="number" id="bp-dia" class="form-control" placeholder="Diastolic (80)" required></div></div>
+                <div class="form-group"><input type="number" id="bp-pulse" class="form-control" placeholder="Pulse (Optional)"></div>
+                <div class="form-group"><input type="date" id="bp-date" class="form-control" required></div>
+                <button type="submit" class="book-btn btn-full" id="bp-btn">Save Log</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="log-temp-modal">
+        <div class="auth-modal">
+            <button class="close-modal" onclick="closeModals()">&times;</button>
+            <h2 class="modal-title" id="temp-modal-title">Log Temp</h2>
+            <p class="success-msg" id="temp-success"></p><p class="error-msg" id="temp-error"></p>
+            <form id="temp-form">
+                <input type="hidden" id="temp-id">
+                <div class="unit-toggle-container"><div class="unit-toggle" onclick="toggleUnit('temp')"><div class="toggle-slider" id="temp-slider"></div><div class="unit-option active" id="opt-c">°C</div><div class="unit-option" id="opt-f">°F</div></div></div>
+                <input type="hidden" id="temp-unit" value="C">
+                <div class="form-group"><input type="number" step="0.1" id="temp-val" class="form-control" placeholder="Temperature" required></div>
+                <div class="form-group"><input type="date" id="temp-date" class="form-control" required></div>
+                <button type="submit" class="book-btn btn-full" id="temp-btn">Save Log</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="log-glucose-modal">
+        <div class="auth-modal">
+            <button class="close-modal" onclick="closeModals()">&times;</button>
+            <h2 class="modal-title" id="gluc-modal-title">Log Glucose</h2>
+            <p class="success-msg" id="gluc-success"></p><p class="error-msg" id="gluc-error"></p>
+            <form id="gluc-form">
+                <input type="hidden" id="gluc-id">
+                <div class="form-group"><select id="gluc-type" class="form-control bg-white" required><option value="" disabled selected>Test Type</option><option value="Fasting">Fasting</option><option value="Random">Random</option><option value="Post-Meal">Post-Meal (2h)</option><option value="Pre-Meal">Before Meal</option></select></div>
+                <div class="form-group"><input type="number" id="gluc-val" class="form-control" placeholder="mg/dL" required></div>
+                <div class="form-group"><input type="date" id="gluc-date" class="form-control" required></div>
+                <button type="submit" class="book-btn btn-full" id="gluc-btn">Save Log</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="reports-modal">
+        <div class="auth-modal">
+            <button class="close-modal" onclick="closeModals()">&times;</button>
+            <h2 class="modal-title">Export Data</h2>
+            <p class="text-center-muted">Download your health records for your doctor.</p>
+            <div onclick="exportPDF()" class="export-btn">
+                <span>Download PDF Report</span>
+                <i class="fa-solid fa-file-pdf export-icon"></i>
+            </div>
+            <div onclick="exportCSV()" class="export-btn">
+                <span>Download CSV (Excel)</span>
+                <i class="fa-solid fa-file-csv export-icon"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="reminders-modal">
+        <div class="auth-modal">
+            <button class="close-modal" onclick="closeModals()">&times;</button>
+            <h2 class="modal-title">Set Reminder</h2>
+            <p class="success-msg" id="remind-success"></p>
+            <form onsubmit="setReminder(event)">
+                <div class="form-group"><label class="input-label">Time to measure:</label><input type="time" id="reminder-time" class="form-control" required></div>
+                <button type="submit" class="book-btn btn-full">Set Daily Alert</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
