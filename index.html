@@ -93,13 +93,13 @@
                                         <i class="fa-solid fa-heart-pulse"></i><span>Health Metrics</span>
                                     </a>
                                 </li>
-                                <li class="nav-item">
-                                    <a href="#" class="nav-link">
+                                <li class="nav-item" id="nav-appointments">
+                                    <a href="#" class="nav-link" onclick="switchView('appointments', this); return false;">
                                         <i class="fa-regular fa-calendar-check"></i><span>Appointments</span>
                                     </a>
                                 </li>
-                                <li class="nav-item">
-                                    <a href="#" class="nav-link">
+                                <li class="nav-item" id="nav-settings">
+                                    <a href="#" class="nav-link" onclick="switchView('settings', this); return false;">
                                         <i class="fa-solid fa-gear"></i><span>Settings</span>
                                     </a>
                                 </li>
@@ -135,54 +135,97 @@
                 <div class="dashboard-container">
 
                     <div id="view-dashboard" class="animate-fade-in">
-                        <div class="page-title-badge"><h2>Quick Actions</h2></div>
-                        <div class="quick-actions-grid">
-                            
-                            <div class="card cursor-pointer hover-border-green" onclick="openModal('reminders')">
-                                <div class="action-card-inner">
-                                    <div class="metric-icon-box icon-box-blue-light"><i class="fa-regular fa-bell"></i></div>
-                                    <h3 class="action-title">Reminders</h3>
-                                    <p class="action-desc">Set daily alerts to log your vitals.</p>
+                        <div class="dash-welcome-header mb-6">
+                            <h1 id="welcome-msg" class="text-2xl font-bold text-gray-800">Good Afternoon</h1>
+                            <p class="text-gray-500 text-sm">Here's your health overview for today</p>
+                        </div>
+                        <div class="grid-2-col mb-6">
+                            <div class="card p-6 flex flex-col justify-between">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div class="icon-bg-green"><i class="fa-regular fa-calendar"></i></div>
+                                    <i class="fa-regular fa-clock text-gray-500"></i>
+                                </div>
+                                <div>
+                                    <h3 id="upcoming-count" class="text-2xl font-bold">--</h3>
+                                    <p class="text-gray-500 text-sm">Upcoming Appointments</p>
                                 </div>
                             </div>
-
-                            <div class="card cursor-pointer hover-border-green" onclick="openModal('reports')">
-                                <div class="action-card-inner">
-                                    <div class="metric-icon-box icon-box-green-light"><i class="fa-solid fa-file-export"></i></div>
-                                    <h3 class="action-title">Export Reports</h3>
-                                    <p class="action-desc">Download PDF or CSV of your history.</p>
+                            <div class="card p-6 flex flex-col justify-between">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div class="icon-bg-green"><i class="fa-regular fa-file-lines"></i></div>
+                                    <i class="fa-solid fa-arrow-up text-green-500"></i>
+                                </div>
+                                <div>
+                                    <h3 id="record-count" class="text-2xl font-bold">--</h3>
+                                    <p class="text-gray-500 text-sm">Medical Records</p>
                                 </div>
                             </div>
-
-                            <div class="card cursor-pointer hover-border-red" onclick="logout()">
-                                <div class="action-card-inner">
-                                    <div class="metric-icon-box icon-box-red-light"><i class="fa-solid fa-right-from-bracket"></i></div>
-                                    <h3 class="action-title text-red">Logout</h3>
-                                    <p class="action-desc">Sign out of your account securely.</p>
+                        </div>
+                        <div class="grid-main-layout mb-6">
+                            <div class="card p-6">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="font-bold text-md">Upcoming Appointments</h3>
+                                    <a href="#" onclick="switchView('appointments', document.getElementById('nav-appointments').querySelector('a')); return false;" class="text-green-600 text-sm font-medium link-no-decor">View All</a>
+                                </div>
+                                <div id="dashboard-appointment-list">
+                                    <div class="loading-cell text-xs text-gray-500">Loading appointments...</div>
                                 </div>
                             </div>
-
+                            <div class="card p-6">
+                                <h3 class="font-bold text-md mb-4">Quick Actions</h3>
+                                <div class="flex flex-col gap-3">
+                                    <button class="btn-action btn-green-solid" onclick="alert('Starting video call...')"><i class="fa-solid fa-video"></i> Start Video Call</button>
+                                    <button class="btn-action btn-gray-light" onclick="openModal('reminders')"><i class="fa-regular fa-calendar-plus"></i> Book Appointment</button>
+                                    <button class="btn-action btn-gray-light" onclick="alert('Opening chat...')"><i class="fa-regular fa-comment-dots"></i> Message Doctor</button>
+                                    <button class="btn-action btn-gray-light" onclick="openModal('reports')"><i class="fa-regular fa-file-lines"></i> View Records</button>
+                                    <button class="btn-action btn-gray-light text-red" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket icon-red"></i> Logout</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid-main-layout">
+                            <div class="card p-6">
+                                <h3 class="font-bold text-md mb-4">Health Trends - Last 7 Days</h3>
+                                <div class="grid-trends">
+                                    <div>
+                                        <div class="flex justify-between mb-2"><span class="text-xs text-gray-500">Heart Rate</span><span class="text-xs text-green-500" id="trend-hr-status">Normal</span></div>
+                                        <h4 class="font-bold text-lg mb-2" id="trend-hr-val">-- <span class="text-xs text-gray-500 font-normal">bpm</span></h4>
+                                        <div class="trend-bar-container" id="trend-hr-bars"></div>
+                                    </div>
+                                    <div>
+                                        <div class="flex justify-between mb-2"><span class="text-xs text-gray-500">BP</span><span class="text-xs text-green-500" id="trend-bp-status">Normal</span></div>
+                                        <h4 class="font-bold text-lg mb-2" id="trend-bp-val">--/-- <span class="text-xs text-gray-500 font-normal">mmHg</span></h4>
+                                        <div class="trend-bar-container" id="trend-bp-bars"></div>
+                                    </div>
+                                    <div>
+                                        <div class="flex justify-between mb-2"><span class="text-xs text-gray-500">Glucose</span><span class="text-xs text-green-500" id="trend-gl-status">Normal</span></div>
+                                        <h4 class="font-bold text-lg mb-2" id="trend-gl-val">-- <span class="text-xs text-gray-500 font-normal">mg/dL</span></h4>
+                                        <div class="trend-bar-container" id="trend-gl-bars"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card p-6">
+                                <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-md">Health Alerts</h3><i class="fa-regular fa-bell text-gray-500"></i></div>
+                                <div class="alert-item alert-green" id="alert-bp-card">
+                                    <div class="alert-icon bg-green-500 text-white" id="alert-bp-icon"><i class="fa-solid fa-check"></i></div>
+                                    <div><h4 class="font-bold text-sm" id="alert-bp-title">BP Normal</h4><p class="text-xs text-gray-500" id="alert-bp-text">Loading data...</p></div>
+                                </div>
+                                <div class="alert-item alert-yellow" id="alert-appt-card">
+                                    <div class="alert-icon bg-yellow-500 text-white" id="alert-appt-icon"><i class="fa-regular fa-calendar"></i></div>
+                                    <div><h4 class="font-bold text-sm" id="alert-appt-title">Appointment</h4><p class="text-xs text-gray-500" id="alert-appt-text">Checking...</p></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <div id="view-metrics" class="hidden-view">
-                        
-                        <div id="insight-banner" class="insight-box hidden-view">
-                            <i class="fa-solid fa-user-doctor insight-icon"></i>
-                            <div class="insight-text">
-                                <h4>AI Insight</h4>
-                                <p id="insight-text">Loading insights...</p>
-                            </div>
-                        </div>
-
+                         <div id="insight-banner" class="insight-box hidden-view">
+                             <i class="fa-solid fa-user-doctor insight-icon"></i>
+                             <div class="insight-text"><h4>AI Insight</h4><p id="insight-text">Loading insights...</p></div>
+                         </div>
                         <section class="card">
                             <div class="page-title-badge"><h2>Health Metrics Tracker</h2></div>
-
                             <div class="dash-card-header">
-                                <div>
-                                    <h3 class="section-title">Analysis</h3>
-                                    <p class="subtitle">Visualize your progress</p>
-                                </div>
+                                <div><h3 class="section-title">Analysis</h3><p class="subtitle">Visualize your progress</p></div>
                                 <div class="chart-controls">
                                     <div class="time-tabs">
                                         <button class="chart-select active" onclick="setChartRange(7, this)">7 Days</button>
@@ -197,73 +240,162 @@
                                     </div>
                                 </div>
                             </div>
-                            
-                            <div class="chart-wrapper">
-                                <canvas id="healthChart"></canvas>
-                            </div>
+                            <div class="chart-wrapper"><canvas id="healthChart"></canvas></div>
                         </section>
-
                         <section>
                             <h3 class="metrics-section-title">Latest Readings</h3>
-                            
                             <div class="metrics-grid">
-                                
                                 <div class="card metric-card-content" onclick="openModal('log-bp')">
                                     <div class="metric-icon-box theme-bp"><i class="fa-solid fa-heart-pulse"></i></div>
-                                    <div class="metric-info">
-                                        <h4 class="metric-label">Blood Pressure</h4>
-                                        <div class="metric-value-large" id="val-bp">--/--</div>
-                                        <div class="metric-unit">mmHg</div>
-                                    </div>
+                                    <div class="metric-info"><h4 class="metric-label">Blood Pressure</h4><div class="metric-value-large" id="val-bp">--/--</div><div class="metric-unit">mmHg</div></div>
                                 </div>
-
                                 <div class="card metric-card-content" onclick="openModal('log-weight')">
                                     <div class="metric-icon-box theme-weight"><i class="fa-solid fa-weight-scale"></i></div>
-                                    <div class="metric-info">
-                                        <h4 class="metric-label">Weight</h4>
-                                        <div class="value-group"><span class="metric-value-large" id="val-weight">--</span><span class="metric-unit">kg</span></div>
-                                    </div>
+                                    <div class="metric-info"><h4 class="metric-label">Weight</h4><div class="value-group"><span class="metric-value-large" id="val-weight">--</span><span class="metric-unit">kg</span></div></div>
                                 </div>
-
                                 <div class="card metric-card-content" onclick="openModal('log-glucose')">
                                     <div class="metric-icon-box theme-glucose"><i class="fa-solid fa-droplet"></i></div>
-                                    <div class="metric-info">
-                                        <h4 class="metric-label">Blood Sugar</h4>
-                                        <div class="metric-value-large" id="val-gluc">--</div>
-                                        <div class="metric-unit">mg/dL</div>
-                                    </div>
+                                    <div class="metric-info"><h4 class="metric-label">Blood Sugar</h4><div class="metric-value-large" id="val-gluc">--</div><div class="metric-unit">mg/dL</div></div>
                                 </div>
-
                                 <div class="card metric-card-content" onclick="openModal('log-temp')">
                                     <div class="metric-icon-box theme-temp"><i class="fa-solid fa-temperature-half"></i></div>
-                                    <div class="metric-info">
-                                        <h4 class="metric-label">Temperature</h4>
-                                        <div class="metric-value-large" id="val-temp">--</div>
-                                        <div class="metric-unit">°C</div>
-                                    </div>
+                                    <div class="metric-info"><h4 class="metric-label">Temperature</h4><div class="metric-value-large" id="val-temp">--</div><div class="metric-unit">°C</div></div>
                                 </div>
-
                             </div>
                         </section>
-
                         <section class="card">
                             <h3 class="section-title text-md">Recent Activity</h3>
                             <div class="history-table-container">
                                 <table class="history-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Date</th>
-                                            <th>Metric</th>
-                                            <th>Value</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="history-body">
-                                        <tr><td colspan="4" class="loading-cell">Loading history...</td></tr>
-                                    </tbody>
+                                    <thead><tr><th>Date</th><th>Metric</th><th>Value</th><th>Action</th></tr></thead>
+                                    <tbody id="history-body"><tr><td colspan="4" class="loading-cell">Loading history...</td></tr></tbody>
                                 </table>
                             </div>
                         </section>
+                    </div>
+
+                    <div id="view-appointments" class="hidden-view">
+                         <div class="flex justify-between items-center mb-6">
+                             <div><h1 class="text-2xl font-bold text-gray-800">Appointments</h1><p class="text-gray-500 text-sm">Manage your healthcare visits</p></div>
+                             <button class="btn-action btn-green-solid btn-auto" onclick="openModal('reminders')"><i class="fa-solid fa-plus"></i> Book Appointment</button>
+                         </div>
+                        <div class="grid-4-col mb-6">
+                            <div class="card appt-summary-card"><div class="appt-icon-lg appt-icon-green"><i class="fa-regular fa-calendar"></i></div><div><h3 class="text-2xl font-bold" id="appt-stat-total">--</h3><p class="text-xs text-gray-500">Upcoming</p></div></div>
+                            <div class="card appt-summary-card"><div class="appt-icon-lg appt-icon-blue"><i class="fa-solid fa-video"></i></div><div><h3 class="text-2xl font-bold" id="appt-stat-virtual">--</h3><p class="text-xs text-gray-500">Virtual Visits</p></div></div>
+                            <div class="card appt-summary-card"><div class="appt-icon-lg appt-icon-purple"><i class="fa-solid fa-location-dot"></i></div><div><h3 class="text-2xl font-bold" id="appt-stat-inperson">--</h3><p class="text-xs text-gray-500">In-Person</p></div></div>
+                            <div class="card appt-summary-card"><div class="appt-icon-lg appt-icon-gray"><i class="fa-solid fa-clock-rotate-left"></i></div><div><h3 class="text-2xl font-bold" id="appt-stat-past">--</h3><p class="text-xs text-gray-500">Past Visits</p></div></div>
+                        </div>
+                        <div class="search-bar-container">
+                            <div class="search-input-wrapper"><i class="fa-solid fa-magnifying-glass"></i><input type="text" id="appt-search" class="search-input" placeholder="Search appointments..." onkeyup="searchAppointments()"></div>
+                            <button class="filter-btn"><i class="fa-solid fa-filter"></i> Filter</button>
+                        </div>
+                        <h3 class="font-bold text-lg mb-4">Upcoming Appointments</h3>
+                        <div id="detailed-appointment-list"></div>
+
+                        <div class="flex justify-between items-center mb-4 mt-4">
+                            <h3 class="font-bold text-lg">Past Appointments</h3>
+                            <a href="#" class="text-green-600 text-sm font-medium link-no-decor">View All ></a>
+                        </div>
+                        <div id="past-appointment-list"></div>
+                    </div>
+
+                    <div id="view-settings" class="hidden-view">
+                        <div class="mb-6"><h1 class="text-2xl font-bold text-gray-800">Settings</h1><p class="text-gray-500 text-sm">Manage your account and preferences</p></div>
+                        <div class="settings-header-card">
+                            <div class="settings-profile-info">
+                                <div class="settings-avatar" id="header-avatar"></div>
+                                <div>
+                                    <h3 class="text-xl font-bold" id="header-name">User</h3>
+                                    <p class="text-sm text-gray-500" id="header-email">user@email.com</p>
+                                    <p class="text-xs text-gray-400 mt-1" id="header-details"></p>
+                                    <div class="verified-badge"><i class="fa-solid fa-shield-halved"></i> Verified Account</div>
+                                </div>
+                            </div>
+                            <button class="btn-action btn-green-solid btn-padded">Edit Profile</button>
+                        </div>
+                        <div class="grid-2-col mb-6">
+                            <div class="card p-6">
+                                <h3 class="settings-section-title"><div class="settings-icon-box bg-green-500"><i class="fa-regular fa-user"></i></div> Personal Information</h3>
+                                <div class="flex flex-col gap-4">
+                                    <div class="settings-input-group"><label>Full Name</label><input type="text" id="settings-fullname" class="settings-input" placeholder="Enter full name"></div>
+                                    <div class="settings-input-group"><label>Email Address</label><input type="email" id="settings-email" class="settings-input" disabled></div>
+                                    <div class="settings-input-group"><label>Phone Number</label><input type="tel" id="settings-phone" class="settings-input" placeholder="Enter phone number"></div>
+                                    <div class="settings-input-group"><label>Date of Birth</label><input type="date" id="settings-dob" class="settings-input"></div>
+                                </div>
+                            </div>
+                            <div class="card p-6">
+                                <h3 class="settings-section-title"><div class="settings-icon-box bg-green-500"><i class="fa-solid fa-location-dot"></i></div> Address Information</h3>
+                                <div class="flex flex-col gap-4">
+                                    <div class="settings-input-group"><label>Street Address</label><input type="text" id="settings-address-street" class="settings-input" placeholder="Enter street address"></div>
+                                    <div class="settings-form-grid">
+                                        <div class="settings-input-group"><label>City</label><input type="text" id="settings-address-city" class="settings-input" placeholder="City"></div>
+                                        <div class="settings-input-group"><label>State</label><input type="text" id="settings-address-state" class="settings-input" placeholder="State"></div>
+                                    </div>
+                                    <div class="settings-form-grid">
+                                        <div class="settings-input-group"><label>ZIP Code</label><input type="text" id="settings-address-zip" class="settings-input" placeholder="ZIP"></div>
+                                        <div class="settings-input-group"><label>Country</label><select id="settings-address-country" class="settings-input"><option value="">Select Country</option></select></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card p-6">
+                                <h3 class="settings-section-title"><div class="settings-icon-box bg-green-500"><i class="fa-regular fa-heart"></i></div> Health Information</h3>
+                                <div class="flex flex-col gap-4">
+                                    <div class="settings-input-group"><label>Blood Type</label><select id="settings-blood" class="settings-input"><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></div>
+                                    <div class="settings-input-group"><label>Height (cm)</label><input type="number" id="settings-height" class="settings-input" placeholder="cm"></div>
+                                    <div class="settings-input-group"><label>Weight (kg)</label><input type="number" id="settings-weight" class="settings-input" placeholder="kg"></div>
+                                    <div class="settings-input-group"><label>Allergies</label><textarea id="settings-allergies" class="settings-input" rows="2" placeholder="List any allergies..."></textarea></div>
+                                </div>
+                            </div>
+                            <div class="card p-6">
+                                <h3 class="settings-section-title"><div class="settings-icon-box bg-red-500"><i class="fa-solid fa-triangle-exclamation"></i></div> Emergency Contact</h3>
+                                <div class="flex flex-col gap-4">
+                                    <div class="settings-input-group"><label>Contact Name</label><input type="text" id="settings-em-name" class="settings-input" placeholder="Contact Name"></div>
+                                    <div class="settings-input-group"><label>Relationship</label><input type="text" id="settings-em-rel" class="settings-input" placeholder="Relationship"></div>
+                                    <div class="settings-input-group"><label>Phone Number</label><input type="tel" id="settings-em-phone" class="settings-input" placeholder="Phone Number"></div>
+                                    <div class="settings-input-group"><label>Email</label><input type="email" id="settings-em-email" class="settings-input" placeholder="Email"></div>
+                                </div>
+                            </div>
+                            <div class="card p-6">
+                                <h3 class="settings-section-title"><div class="settings-icon-box bg-green-500"><i class="fa-regular fa-bell"></i></div> Notifications</h3>
+                                <div>
+                                    <div class="toggle-item"><div><h4 class="font-bold text-sm">Appointment Reminders</h4><p class="text-xs text-gray-500">Get notified before appointments</p></div><div class="toggle-switch checked"><div class="toggle-thumb"></div></div></div>
+                                    <div class="toggle-item"><div><h4 class="font-bold text-sm">Medication Reminders</h4><p class="text-xs text-gray-500">Daily medication schedule alerts</p></div><div class="toggle-switch checked"><div class="toggle-thumb"></div></div></div>
+                                    <div class="toggle-item"><div><h4 class="font-bold text-sm">Lab Results</h4><p class="text-xs text-gray-500">Notify when results are available</p></div><div class="toggle-switch checked"><div class="toggle-thumb"></div></div></div>
+                                    <div class="toggle-item"><div><h4 class="font-bold text-sm">Health Tips</h4><p class="text-xs text-gray-500">Receive personalized health tips</p></div><div class="toggle-switch"><div class="toggle-thumb"></div></div></div>
+                                </div>
+                            </div>
+                            <div class="card p-6">
+                                <h3 class="settings-section-title"><div class="settings-icon-box bg-green-500"><i class="fa-solid fa-lock"></i></div> Security</h3>
+                                <div class="flex flex-col gap-4">
+                                    <div class="settings-input-group"><label>Current Password</label><input type="password" class="settings-input" placeholder="........"></div>
+                                    <div class="settings-input-group"><label>New Password</label><input type="password" class="settings-input" placeholder="........"></div>
+                                    <div class="settings-input-group"><label>Confirm Password</label><input type="password" class="settings-input" placeholder="........"></div>
+                                    <button class="btn-action btn-green-solid">Update Password</button>
+                                    <div class="toggle-item border-none pt-2"><div><h4 class="font-bold text-sm">Two-Factor Authentication</h4><p class="text-xs text-gray-500">Add extra security to your account</p></div><div class="toggle-switch"><div class="toggle-thumb"></div></div></div>
+                                </div>
+                            </div>
+                            <div class="card p-6">
+                                <h3 class="settings-section-title"><div class="settings-icon-box bg-green-500"><i class="fa-regular fa-file-alt"></i></div> Privacy & Data</h3>
+                                <div>
+                                    <div class="toggle-item"><div><h4 class="font-bold text-sm">Share Health Data</h4><p class="text-xs text-gray-500">Allow data sharing with healthcare providers</p></div><div class="toggle-switch checked"><div class="toggle-thumb"></div></div></div>
+                                    <div class="toggle-item"><div><h4 class="font-bold text-sm">Research Participation</h4><p class="text-xs text-gray-500">Contribute anonymized data for research</p></div><div class="toggle-switch"><div class="toggle-thumb"></div></div></div>
+                                    <div class="mt-4 flex flex-col gap-2"><button class="btn-outline-gray">Download My Data</button><button class="btn-outline-red">Delete Account</button></div>
+                                </div>
+                            </div>
+                            <div class="card p-6">
+                                <h3 class="settings-section-title"><div class="settings-icon-box bg-green-500"><i class="fa-solid fa-globe"></i></div> Preferences</h3>
+                                <div class="flex flex-col gap-4">
+                                    <div class="settings-input-group"><label>Language</label><select class="settings-input"><option selected>English</option><option>Spanish</option><option>French</option></select></div>
+                                    <div class="settings-input-group"><label>Timezone</label><select class="settings-input"><option selected>EST (UTC-5)</option><option>PST (UTC-8)</option><option>GMT (UTC+0)</option></select></div>
+                                    <div class="settings-input-group"><label>Date Format</label><select class="settings-input"><option selected>MM/DD/YYYY</option><option>DD/MM/YYYY</option></select></div>
+                                    <div class="toggle-item border-none"><div><h4 class="font-bold text-sm">Dark Mode</h4><p class="text-xs text-gray-500">Enable dark theme</p></div><div class="toggle-switch" id="dark-mode-toggle" onclick="toggleDarkMode(this)"><div class="toggle-thumb"></div></div></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="footer-actions">
+                            <button class="btn-action btn-gray-light btn-padded-lg">Cancel</button>
+                            <button class="btn-action btn-green-solid btn-padded-lg" onclick="saveSettings()">Save Changes</button>
+                        </div>
                     </div>
 
                 </div>
@@ -280,7 +412,7 @@
                 <div class="form-group"><input type="email" id="login-email" class="form-control" placeholder="Email Address" required></div>
                 <div class="form-group"><input type="password" id="login-password" class="form-control" placeholder="Password" required></div>
                 <div class="forgot-wrapper"><a href="#" class="forgot-link" onclick="openModal('reset')">Forgot Password?</a></div>
-                <button type="submit" class="book-btn btn-full">Login</button>
+                <button type="submit" id="btn-login-submit" class="book-btn btn-full">Login</button>
             </form>
             <div class="divider">Or login with</div>
             <div class="social-login">
@@ -327,74 +459,71 @@
             <button class="close-modal" onclick="closeModals()">&times;</button>
             <h2 class="modal-title" id="weight-modal-title">Log Weight</h2>
             <p class="success-msg" id="weight-success"></p><p class="error-msg" id="weight-error"></p>
-            <form id="weight-form">
-                <input type="hidden" id="weight-id"> <div class="unit-toggle-container"><div class="unit-toggle" onclick="toggleUnit('weight')"><div class="toggle-slider" id="weight-slider"></div><div class="unit-option active" id="opt-kg">kg</div><div class="unit-option" id="opt-lbs">lbs</div></div></div>
-                <input type="hidden" id="weight-unit" value="kg">
-                <div class="form-group"><input type="number" step="0.1" id="weight-val" class="form-control" placeholder="Weight Value" required></div>
-                <div class="form-group"><input type="date" id="weight-date" class="form-control" required></div>
-                <button type="submit" class="book-btn btn-full" id="weight-btn">Save Log</button>
-            </form>
+            <form id="weight-form"><input type="hidden" id="weight-id"><div class="unit-toggle-container"><div class="unit-toggle" onclick="toggleUnit('weight')"><div class="toggle-slider" id="weight-slider"></div><div class="unit-option active" id="opt-kg">kg</div><div class="unit-option" id="opt-lbs">lbs</div></div></div><input type="hidden" id="weight-unit" value="kg"><div class="form-group"><input type="number" step="0.1" id="weight-val" class="form-control" placeholder="Weight Value" required></div><div class="form-group"><input type="date" id="weight-date" class="form-control" required></div><button type="submit" class="book-btn btn-full" id="weight-btn">Save Log</button></form>
         </div>
     </div>
-
     <div class="modal-overlay" id="log-bp-modal">
         <div class="auth-modal">
             <button class="close-modal" onclick="closeModals()">&times;</button>
             <h2 class="modal-title" id="bp-modal-title">Log BP</h2>
             <p class="success-msg" id="bp-success"></p><p class="error-msg" id="bp-error"></p>
-            <form id="bp-form">
-                <input type="hidden" id="bp-id">
-                <div class="flex-row"><div class="form-group flex-1"><input type="number" id="bp-sys" class="form-control" placeholder="Systolic (120)" required></div><div class="form-group flex-1"><input type="number" id="bp-dia" class="form-control" placeholder="Diastolic (80)" required></div></div>
-                <div class="form-group"><input type="number" id="bp-pulse" class="form-control" placeholder="Pulse (Optional)"></div>
-                <div class="form-group"><input type="date" id="bp-date" class="form-control" required></div>
-                <button type="submit" class="book-btn btn-full" id="bp-btn">Save Log</button>
-            </form>
+            <form id="bp-form"><input type="hidden" id="bp-id"><div class="flex-row"><div class="form-group flex-1"><input type="number" id="bp-sys" class="form-control" placeholder="Systolic (120)" required></div><div class="form-group flex-1"><input type="number" id="bp-dia" class="form-control" placeholder="Diastolic (80)" required></div></div><div class="form-group"><input type="number" id="bp-pulse" class="form-control" placeholder="Pulse (Optional)"></div><div class="form-group"><input type="date" id="bp-date" class="form-control" required></div><button type="submit" class="book-btn btn-full" id="bp-btn">Save Log</button></form>
         </div>
     </div>
-
     <div class="modal-overlay" id="log-temp-modal">
         <div class="auth-modal">
             <button class="close-modal" onclick="closeModals()">&times;</button>
             <h2 class="modal-title" id="temp-modal-title">Log Temp</h2>
             <p class="success-msg" id="temp-success"></p><p class="error-msg" id="temp-error"></p>
-            <form id="temp-form">
-                <input type="hidden" id="temp-id">
-                <div class="unit-toggle-container"><div class="unit-toggle" onclick="toggleUnit('temp')"><div class="toggle-slider" id="temp-slider"></div><div class="unit-option active" id="opt-c">°C</div><div class="unit-option" id="opt-f">°F</div></div></div>
-                <input type="hidden" id="temp-unit" value="C">
-                <div class="form-group"><input type="number" step="0.1" id="temp-val" class="form-control" placeholder="Temperature" required></div>
-                <div class="form-group"><input type="date" id="temp-date" class="form-control" required></div>
-                <button type="submit" class="book-btn btn-full" id="temp-btn">Save Log</button>
-            </form>
+            <form id="temp-form"><input type="hidden" id="temp-id"><div class="unit-toggle-container"><div class="unit-toggle" onclick="toggleUnit('temp')"><div class="toggle-slider" id="temp-slider"></div><div class="unit-option active" id="opt-c">°C</div><div class="unit-option" id="opt-f">°F</div></div></div><input type="hidden" id="temp-unit" value="C"><div class="form-group"><input type="number" step="0.1" id="temp-val" class="form-control" placeholder="Temperature" required></div><div class="form-group"><input type="date" id="temp-date" class="form-control" required></div><button type="submit" class="book-btn btn-full" id="temp-btn">Save Log</button></form>
         </div>
     </div>
-
     <div class="modal-overlay" id="log-glucose-modal">
         <div class="auth-modal">
             <button class="close-modal" onclick="closeModals()">&times;</button>
             <h2 class="modal-title" id="gluc-modal-title">Log Glucose</h2>
             <p class="success-msg" id="gluc-success"></p><p class="error-msg" id="gluc-error"></p>
-            <form id="gluc-form">
-                <input type="hidden" id="gluc-id">
-                <div class="form-group"><select id="gluc-type" class="form-control bg-white" required><option value="" disabled selected>Test Type</option><option value="Fasting">Fasting</option><option value="Random">Random</option><option value="Post-Meal">Post-Meal (2h)</option><option value="Pre-Meal">Before Meal</option></select></div>
-                <div class="form-group"><input type="number" id="gluc-val" class="form-control" placeholder="mg/dL" required></div>
-                <div class="form-group"><input type="date" id="gluc-date" class="form-control" required></div>
-                <button type="submit" class="book-btn btn-full" id="gluc-btn">Save Log</button>
-            </form>
+            <form id="gluc-form"><input type="hidden" id="gluc-id"><div class="form-group"><select id="gluc-type" class="form-control bg-white" required><option value="" disabled selected>Test Type</option><option value="Fasting">Fasting</option><option value="Random">Random</option><option value="Post-Meal">Post-Meal (2h)</option><option value="Pre-Meal">Before Meal</option></select></div><div class="form-group"><input type="number" id="gluc-val" class="form-control" placeholder="mg/dL" required></div><div class="form-group"><input type="date" id="gluc-date" class="form-control" required></div><button type="submit" class="book-btn btn-full" id="gluc-btn">Save Log</button></form>
         </div>
     </div>
 
     <div class="modal-overlay" id="reports-modal">
-        <div class="auth-modal">
+        <div class="auth-modal modal-wide overflow-hidden">
             <button class="close-modal" onclick="closeModals()">&times;</button>
-            <h2 class="modal-title">Export Data</h2>
-            <p class="text-center-muted">Download your health records for your doctor.</p>
-            <div onclick="exportPDF()" class="export-btn">
-                <span>Download PDF Report</span>
-                <i class="fa-solid fa-file-pdf export-icon"></i>
+            <h2 class="modal-title">Health History Report</h2>
+            <div class="flex justify-between items-center mb-4">
+                <p class="text-sm text-gray-500">Review your history before downloading.</p>
+                <select class="chart-select select-bordered">
+                    <option>All Time</option>
+                    <option>Last 30 Days</option>
+                    <option>Last 7 Days</option>
+                </select>
             </div>
-            <div onclick="exportCSV()" class="export-btn">
-                <span>Download CSV (Excel)</span>
-                <i class="fa-solid fa-file-csv export-icon"></i>
+            
+            <div class="table-scroll-container">
+                <table class="history-table w-full">
+                    <thead class="table-header-sticky">
+                        <tr>
+                            <th class="p-3 text-left text-sm text-gray-500">Date</th>
+                            <th class="p-3 text-left text-sm text-gray-500">Type</th>
+                            <th class="p-3 text-left text-sm text-gray-500">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody id="report-preview-body">
+                        <tr><td colspan="3" class="loading-cell">Loading data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="modal-footer">
+                <div onclick="exportPDF()" class="export-btn flex-1 justify-center mb-0">
+                    <i class="fa-solid fa-file-pdf export-icon mr-2"></i>
+                    <span>Download PDF</span>
+                </div>
+                <div onclick="exportCSV()" class="export-btn flex-1 justify-center mb-0">
+                    <i class="fa-solid fa-file-csv export-icon mr-2"></i>
+                    <span>Download CSV</span>
+                </div>
             </div>
         </div>
     </div>
